@@ -1,15 +1,8 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.1.RELEASE"
-    }
+plugins {
+    id "java"
+    id "org.springframework.boot" version "2.0.1.RELEASE"
+    id "io.spring.dependency-management" version "1.0.5.RELEASE"
 }
-
-apply plugin: "java"
-apply plugin: "org.springframework.boot"
-apply plugin: "io.spring.dependency-management"
 
 group 'com.company'
 version '1.0-SNAPSHOT'
@@ -28,3 +21,5 @@ dependencies {
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "org.testcontainers:postgresql:1.6.0"
 }
+
+

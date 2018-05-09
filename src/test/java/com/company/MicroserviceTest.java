@@ -5,10 +5,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.transaction.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -17,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MicroserviceTest extends AbstractIntegrationTest {
+@ActiveProfiles("test")
+public class MicroserviceTest extends TestcontainersPostgresInitializer {
     @Autowired
     private WebApplicationContext ctx;
 
@@ -33,6 +38,14 @@ public class MicroserviceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    public void shouldReturnEmptyJsonIfDbIsEmpty() throws Exception {
+        mockMvc.perform(get("/hello/contacts?nameFilter=^a.*$"))
+                .andExpect(jsonPath("$.contacts", hasSize(0)));
+    }
+
+    @Test
+    @Sql("/populate_contacts.sql")
+    @Transactional
     public void shouldNotReturnFilteredContact() throws Exception {
         mockMvc.perform(get("/hello/contacts?nameFilter=^a.*$"))
                 .andExpect(jsonPath("$.contacts[0].name", is("bbb")))
@@ -40,6 +53,8 @@ public class MicroserviceTest extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql("/populate_contacts.sql")
+    @Transactional
     public void shouldReturnAllContactsWhenFilterWithUnexistedContact() throws Exception {
         mockMvc.perform(get("/hello/contacts?nameFilter=^c.*$"))
                 .andExpect(jsonPath("$.contacts[0].name", is("aaa")))
